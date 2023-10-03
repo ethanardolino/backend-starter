@@ -116,6 +116,16 @@ export default class DocCollection<Schema extends BaseDoc> {
   }
 
   /**
+   * Update all document that matches `filter` based on existing fields in `update`.
+   */
+  async updateMany(filter: Filter<Schema>, update: Partial<Schema>, options?: FindOneAndUpdateOptions): Promise<UpdateResult<Schema>> {
+    this.sanitizeItem(update);
+    this.sanitizeFilter(filter);
+    update.dateUpdated = new Date();
+    return await this.collection.updateMany(filter, { $set: update }, options);
+  }
+
+  /**
    * Delete the document that matches `filter`.
    */
   async deleteOne(filter: Filter<Schema>, options?: DeleteOptions): Promise<DeleteResult> {
