@@ -136,6 +136,76 @@ class Routes {
     const fromId = (await User.getUserByUsername(from))._id;
     return await Friend.rejectRequest(fromId, user);
   }
+
+  // ========================================================================================
+  // MileStone Syncs --> a lot of my implementation will be modifying the given synchronizations
+  //                      above to incorporate my "novel" concepts
+  // ========================================================================================
+
+  @Router.get("/labels/items/:labels")
+  async getFeed(session: WebSessionDoc, labels: Set<String> | undefined) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/profiles")
+  async createProfile(session: WebSessionDoc) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.delete("/profiles/:_id")
+  async deleteProfile(session: WebSessionDoc, _id: ObjectId) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/following/:_id")
+  async follow(session: WebSessionDoc, _id: ObjectId) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.delete("/following/:_id")
+  async unfollow(session: WebSessionDoc, _id: ObjectId) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.get("/profiles/timeActive")
+  async getUsage(session: WebSessionDoc) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/profiles/timeActive")
+  async updateUsage(session: WebSessionDoc) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.get("/labels/:_id")
+  async getItemLabel(session: WebSessionDoc, _id: ObjectId) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/labels/:_id&label")
+  async createItemLabel(session: WebSessionDoc, _id: ObjectId, label: String) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/labels/:_id&label")
+  async removeItemLabel(session: WebSessionDoc, _id: ObjectId, label: String) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.post("/limit/:_id")
+  async createLimited(session: WebSessionDoc, _id: ObjectId) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.get("/limit")
+  async hasUserPosted(session: WebSessionDoc) {
+    throw new Error("Not implemented yet");
+  }
+
+  @Router.delete("/limit")
+  async resetLimits() {
+    throw new Error("Not implemented yet");
+  }
 }
 
 export default getExpressRouter(new Routes());
