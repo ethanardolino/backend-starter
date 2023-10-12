@@ -1,6 +1,6 @@
 import { Filter, ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
-import { NotAllowedError, NotFoundError } from "./errors";
+import { NotAllowedError } from "./errors";
 
 export interface LimitDoc extends BaseDoc {
   item_id: ObjectId;
@@ -25,7 +25,9 @@ abstract class LimitedAbsConcept<T extends LimitDoc> {
   abstract genFilter(_id: ObjectId): Filter<T>;
 
   async create(item_id: ObjectId, count: number) {
-    if (count > this.maxLimit) {
+    if (await this.limited.readOne(this.genFilter(item_id))) {
+      throw new NotAllowedError("This item is already Limited!");
+    } else if (count > this.maxLimit) {
       throw new NotAllowedError(`Limited item has count ${count} > ${this.maxLimit} (max limit) before initialization.`);
     } else {
       const _id = await this.limited.createOne(this.genPartial(item_id, count));
@@ -35,33 +37,29 @@ abstract class LimitedAbsConcept<T extends LimitDoc> {
 
   async delete(item_id: ObjectId) {
     await this.limited.deleteOne(this.genFilter(item_id));
-    return { msg: `Successfully deleted Limited item w/ id = ${item_id}` };
+    return { msg: `Successfully deleted Limited item` };
   }
 
   async getLimited(item_id: ObjectId) {
-    const limited = await this.limited.readOne(this.genFilter(item_id));
-    if (!limited) {
-      throw new NotFoundError(`No Limited item w/ id = ${item_id}`);
-    } else return limited;
+    return await this.limited.readOne(this.genFilter(item_id));
   }
 
   async getCount(item_id: ObjectId) {
     const limited = await this.getLimited(item_id);
-    return limited.count;
+    return limited!.count;
   }
 
   underLimit(count: number) {
     return count <= this.maxLimit;
   }
 
-  async increment(item_id: ObjectId, count: number) {
-    const newCount = count + (await this.getCount(item_id));
-    if (await this.underLimit(newCount)) {
-      const partialLimit = this.genPartial(item_id, newCount);
+  async updateCount(item_id: ObjectId, count: number) {
+    if (this.underLimit(count)) {
+      const partialLimit = this.genPartial(item_id, count);
       await this.limited.updateOne(this.genFilter(item_id), partialLimit);
-      return { msg: `Successfully incremented Limited item w/ id =${item_id} to ${newCount}` };
+      return { msg: `Successfully changed count of Limited item w/ to ${count}` };
     } else {
-      throw new NotAllowedError(`Incrementing Limited item w/ id=${item_id} by ${count} results in a count of ${newCount} > ${this.maxLimit}`);
+      throw new NotAllowedError(`Changing count of Limited item results in a count of ${count} > ${this.maxLimit}`);
     }
   }
 
@@ -76,11 +74,11 @@ export class LimitedProfileConcept extends LimitedAbsConcept<LimitProfileDoc> {
   public readonly limited = new DocCollection<LimitProfileDoc>("limited_profiles");
 
   genPartial(item_id: ObjectId, count: number): Partial<LimitProfileDoc> {
-    return { item_id: item_id, count: count };
+    return { item_id: item_id, count: count, type: "limited_profile" };
   }
 
-  genFilter(_id: ObjectId): Filter<LimitProfileDoc> {
-    return { _id };
+  genFilter(item_id: ObjectId): Filter<LimitProfileDoc> {
+    return { item_id };
   }
 }
 
@@ -89,10 +87,10 @@ export class LimitedPostConcept extends LimitedAbsConcept<LimitPostDoc> {
   public readonly limited = new DocCollection<LimitPostDoc>("limited_posts");
 
   genPartial(item_id: ObjectId, count: number): Partial<LimitPostDoc> {
-    return { item_id: item_id, count: count };
+    return { item_id: item_id, count: count, type: "limited_post" };
   }
 
-  genFilter(_id: ObjectId): Filter<LimitPostDoc> {
-    return { _id };
+  genFilter(item_id: ObjectId): Filter<LimitPostDoc> {
+    return { item_id };
   }
 }

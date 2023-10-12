@@ -10,6 +10,7 @@ export type WebSessionDoc = SessionData;
 declare module "express-session" {
   export interface SessionData {
     user?: string;
+    start?: string;
   }
 }
 
@@ -17,6 +18,7 @@ export default class WebSessionConcept {
   start(session: WebSessionDoc, user: ObjectId) {
     this.isLoggedOut(session);
     session.user = user.toString();
+    session.start = new Date().valueOf().toString();
   }
 
   end(session: WebSessionDoc) {
@@ -39,5 +41,9 @@ export default class WebSessionConcept {
     if (session.user !== undefined) {
       throw new NotAllowedError("Must be logged out!");
     }
+  }
+
+  getSessionTime(session: WebSessionDoc) {
+    return Math.floor((new Date().valueOf() - parseInt(session.start!)) / 1000);
   }
 }

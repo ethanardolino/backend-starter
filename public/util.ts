@@ -18,10 +18,16 @@ const operations: operation[] = [
     fields: {},
   },
   {
+    name: "Get Usage Time (logged in user)",
+    endpoint: "/api/profiles/timeActive",
+    method: "GET",
+    fields: {},
+  },
+  {
     name: "Create User",
     endpoint: "/api/users",
     method: "POST",
-    fields: { username: "input", password: "input" },
+    fields: { username: "input", password: "input", handle: "input" },
   },
   {
     name: "Login",
@@ -36,10 +42,16 @@ const operations: operation[] = [
     fields: {},
   },
   {
-    name: "Update User",
-    endpoint: "/api/users",
-    method: "PATCH",
-    fields: { update: { username: "input", password: "input" } },
+    name: "Get Users (empty for all)",
+    endpoint: "/api/users/:username",
+    method: "GET",
+    fields: { username: "input" },
+  },
+  {
+    name: "Get Profile Info",
+    endpoint: "/api/profiles",
+    method: "GET",
+    fields: {},
   },
   {
     name: "Delete User",
@@ -48,10 +60,64 @@ const operations: operation[] = [
     fields: {},
   },
   {
-    name: "Get Users (empty for all)",
-    endpoint: "/api/users/:username",
+    name: "Update User",
+    endpoint: "/api/users",
+    method: "PATCH",
+    fields: { update: { username: "input", password: "input" } },
+  },
+  {
+    name: "Change Handle",
+    endpoint: "/api/profiles/handle/:new_handle",
+    method: "PATCH",
+    fields: { new_handle: "input" },
+  },
+  {
+    name: "Get Accounts Followed",
+    endpoint: "/api/profiles/following",
     method: "GET",
+    fields: {},
+  },
+  {
+    name: "Follow Account",
+    endpoint: "/api/profiles/following/:username",
+    method: "POST",
     fields: { username: "input" },
+  },
+  {
+    name: "Unollow Account",
+    endpoint: "/api/profiles/following/:username",
+    method: "DELETE",
+    fields: { username: "input" },
+  },
+  {
+    name: "Get User Feed (NOT CURRENTLY WORKING)",
+    endpoint: "/api/labels/items/:labels",
+    method: "GET",
+    fields: { labels: "input" },
+  },
+  {
+    name: "Label an Item",
+    endpoint: "/api/labels/:item_id&label",
+    method: "POST",
+    fields: { item_id: "input", label: "input" },
+  },
+  {
+    name: "Get Item's Labels",
+    endpoint: "/api/labels/:item_id",
+    method: "GET",
+    fields: { item_id: "input" },
+  },
+  {
+    name: "Get All of User's Labels",
+    endpoint: "/api/labels",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Remove a Label from an Item",
+    endpoint: "/api/labels/:item_id&label",
+    method: "DELETE",
+    fields: { item_id: "input", label: "input" },
   },
   {
     name: "Get Posts (empty for all)",
@@ -76,6 +142,18 @@ const operations: operation[] = [
     endpoint: "/api/posts/:id",
     method: "DELETE",
     fields: { id: "input" },
+  },
+  {
+    name: "Get Limited Items",
+    endpoint: "/api/limited_profile",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Reset Profile/Post Limits",
+    endpoint: "/api/limited_profile",
+    method: "DELETE",
+    fields: {},
   },
 ];
 

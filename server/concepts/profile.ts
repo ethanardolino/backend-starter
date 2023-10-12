@@ -21,13 +21,13 @@ export default class ProfileConcept {
     if (await this.profiles.readOne({ user })) {
       throw new NotAllowedError(`A profile associated with id=${user} already exists!`);
     }
-    const _id = await this.profiles.createOne({ user, handle, timeActive: 0 });
+    const _id = await this.profiles.createOne({ user, handle, timeActive: 1 });
     return { msg: "Profile created successfully!", profile: await this.profiles.readOne({ _id }) };
   }
 
   async delete(user: ObjectId) {
     await this.profiles.deleteOne({ user });
-    return { msg: `Profile id=${user} deleted successfully!` };
+    return { msg: `Profile deleted successfully!` };
   }
 
   async getProfile(user: ObjectId) {
@@ -39,18 +39,23 @@ export default class ProfileConcept {
   }
 
   async followAccount(user: ObjectId, follows: ObjectId) {
-    await this.following.createOne({ user, follows });
-    return { msg: `Profile id=${user} successfully FOLLOWED Profile id=${follows}` };
+    if (await this.following.readOne({ user, follows })) {
+      throw new NotAllowedError("Account is already followed!");
+    } else {
+      await this.following.createOne({ user, follows });
+      return { msg: `Successfully FOLLOWED Profile id=${follows}` };
+    }
   }
 
   async unfollowAccount(user: ObjectId, follows: ObjectId) {
     await this.following.deleteOne({ user, follows });
-    return { msg: `Profile id=${user} successfully UNFOLLOWED Profile id=${follows}` };
+    return { msg: `Successfully UNFOLLOWED Profile id=${follows}` };
   }
 
-  async changeHandle(user: ObjectId, newHandle: String) {
-    const updatedHandle: Partial<ProfileDoc> = { handle: newHandle };
+  async changeHandle(user: ObjectId, new_handle: String) {
+    const updatedHandle: Partial<ProfileDoc> = { handle: new_handle };
     await this.profiles.updateOne({ user }, updatedHandle);
+    return { msg: `Successfully updated 'handle' to ${new_handle}` };
   }
 
   async getTimeActive(user: ObjectId) {
@@ -58,12 +63,16 @@ export default class ProfileConcept {
     if (!profile) {
       throw new NotFoundError(`No Profile is currently associated with id=${user}`);
     }
-    return profile?.timeActive;
+    return profile.timeActive;
   }
 
   async addTimeActive(user: ObjectId, time: number) {
     const aggregateTime = (await this.getTimeActive(user)) + time;
     const updatedTime: Partial<ProfileDoc> = { timeActive: aggregateTime };
     await this.profiles.updateOne({ user }, updatedTime);
+  }
+
+  getReadableTimeActive(seconds: number) {
+    return { minutes: Math.floor(seconds / 60), seconds: seconds % 60 };
   }
 }
