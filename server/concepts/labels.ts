@@ -31,7 +31,8 @@ export default class LabelConcept {
     return (await this.labels.readMany(query)).map((labelDoc) => labelDoc.label);
   }
 
-  async getUserLabeledItems(owner: ObjectId, labels: String[]) {
-    return await this.labels.readMany({ owner, label: { $in: labels } });
+  async getUserLabeledItems(owner: ObjectId, label?: String) {
+    const query = label ? { owner, label } : { owner };
+    return await this.labels.readMany(query);
   }
 }

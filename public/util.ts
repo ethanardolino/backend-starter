@@ -90,10 +90,16 @@ const operations: operation[] = [
     fields: { username: "input" },
   },
   {
-    name: "Get User Feed (NOT CURRENTLY WORKING)",
-    endpoint: "/api/labels/items/:labels",
+    name: "Get a Filtered Feed",
+    endpoint: "/api/labels/:filter",
     method: "GET",
-    fields: { labels: "input" },
+    fields: { filter: "input" },
+  },
+  {
+    name: "Get All of User's Labeled Items",
+    endpoint: "/api/labels",
+    method: "GET",
+    fields: {},
   },
   {
     name: "Label an Item",
@@ -108,12 +114,6 @@ const operations: operation[] = [
     fields: { item_id: "input" },
   },
   {
-    name: "Get All of User's Labels",
-    endpoint: "/api/labels",
-    method: "GET",
-    fields: {},
-  },
-  {
     name: "Remove a Label from an Item",
     endpoint: "/api/labels/:item_id&label",
     method: "DELETE",
@@ -126,7 +126,7 @@ const operations: operation[] = [
     fields: { author: "input" },
   },
   {
-    name: "Create Post",
+    name: "Create Post (a user can post 1 time until Limits Reset & post limited to 200 char)",
     endpoint: "/api/posts",
     method: "POST",
     fields: { content: "input" },

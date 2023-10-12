@@ -93,6 +93,7 @@ class Routes {
     const user = WebSession.getUser(session);
     const follow = (await User.getUserByUsername(username))._id;
     await Profile.followAccount(user, follow);
+    await Label.create(user, "_follow_", follow);
     return { msg: `Successfully followed '${username}'` };
   }
 
@@ -101,17 +102,20 @@ class Routes {
     const user = WebSession.getUser(session);
     const follow = (await User.getUserByUsername(username))._id;
     await Profile.unfollowAccount(user, follow);
+    await Label.remove(user, "_follow_", follow);
     return { msg: `Successfully unfollowed '${username}'` };
   }
 
-  @Router.get("/labels/items/:labels")
-  async getFeed(session: WebSessionDoc, labels?: String[]) {
+  @Router.get("/labels/:filter")
+  async getFilteredFeed(session: WebSessionDoc, filter: String) {
     const user = WebSession.getUser(session);
-    if (!labels) {
-      labels = await this.getLabels(session);
-    }
-    const feed = await Label.getUserLabeledItems(user, labels);
-    return { msg: "Successfully got the feed!", feed: feed };
+    return await Label.getUserLabeledItems(user, filter);
+  }
+
+  @Router.get("/labels")
+  async getAllLabeledItems(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    return await Label.getUserLabeledItems(user);
   }
 
   @Router.post("/labels/:item_id&label")
@@ -124,12 +128,6 @@ class Routes {
   async getItemLabel(session: WebSessionDoc, item_id: ObjectId) {
     const user = WebSession.getUser(session);
     return await Label.getLabels(user, item_id);
-  }
-
-  @Router.get("/labels")
-  async getLabels(session: WebSessionDoc) {
-    const user = WebSession.getUser(session);
-    return await Label.getLabels(user);
   }
 
   @Router.delete("/labels/:item_id&label")
@@ -197,58 +195,6 @@ class Routes {
   async resetLimits() {
     return await Promise.all([LimitedPost.reset(), LimitedProfile.reset()]);
   }
-
-  // // ========================================================================================
-  // // MileStone Syncs --> a lot of my implementation will be modifying the given synchronizations
-  // //                      above to incorporate my "novel" concepts
-  // // ========================================================================================
-
-  // @Router.get("/friends")
-  // async getFriends(session: WebSessionDoc) {
-  //   const user = WebSession.getUser(session);
-  //   return await User.idsToUsernames(await Friend.getFriends(user));
-  // }
-
-  // @Router.delete("/friends/:friend")
-  // async removeFriend(session: WebSessionDoc, friend: string) {
-  //   const user = WebSession.getUser(session);
-  //   const friendId = (await User.getUserByUsername(friend))._id;
-  //   return await Friend.removeFriend(user, friendId);
-  // }
-
-  // @Router.get("/friend/requests")
-  // async getRequests(session: WebSessionDoc) {
-  //   const user = WebSession.getUser(session);
-  //   return await Responses.friendRequests(await Friend.getRequests(user));
-  // }
-
-  // @Router.post("/friend/requests/:to")
-  // async sendFriendRequest(session: WebSessionDoc, to: string) {
-  //   const user = WebSession.getUser(session);
-  //   const toId = (await User.getUserByUsername(to))._id;
-  //   return await Friend.sendRequest(user, toId);
-  // }
-
-  // @Router.delete("/friend/requests/:to")
-  // async removeFriendRequest(session: WebSessionDoc, to: string) {
-  //   const user = WebSession.getUser(session);
-  //   const toId = (await User.getUserByUsername(to))._id;
-  //   return await Friend.removeRequest(user, toId);
-  // }
-
-  // @Router.put("/friend/accept/:from")
-  // async acceptFriendRequest(session: WebSessionDoc, from: string) {
-  //   const user = WebSession.getUser(session);
-  //   const fromId = (await User.getUserByUsername(from))._id;
-  //   return await Friend.acceptRequest(fromId, user);
-  // }
-
-  // @Router.put("/friend/reject/:from")
-  // async rejectFriendRequest(session: WebSessionDoc, from: string) {
-  //   const user = WebSession.getUser(session);
-  //   const fromId = (await User.getUserByUsername(from))._id;
-  //   return await Friend.rejectRequest(fromId, user);
-  // }
 }
 
 export default getExpressRouter(new Routes());
